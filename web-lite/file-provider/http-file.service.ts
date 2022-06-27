@@ -36,49 +36,42 @@ export class HttpFileService extends AbstractHttpFileService {
     super();
   }
 
+  async fetchPath(uri: Uri) {
+    let resp: any = await fetch("https://file.sonaco.cc:10000/api/public/path", {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "zh-CN,zh;q=0.9",
+        "authorization": "",
+        "content-type": "application/json;charset=UTF-8",
+        "sec-ch-ua": "\".Not/A)Brand\";v=\"99\", \"Google Chrome\";v=\"103\", \"Chromium\";v=\"103\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin"
+      },
+      "body": JSON.stringify({ "path": uri.path, "password": "", "page_num": 1, "page_size": 30 }),
+      "method": "POST",
+      "mode": "cors",
+      // "credentials": "include"
+    });;
+    resp = await resp.json();
+    return resp.data.files.map(it => {
+      return {
+        
+      }
+    });
+  }
+
   async initWorkspace(uri: Uri): Promise<{ [filename: string]: TreeEntry }> {
     const map: {
       [filePath: string]: TreeEntry;
     } = {};
 
-    const [, platform, owner, name] = uri.path.split('/');
+    const files = await this.fetchPath(uri);
+    console.log(files);
 
-    this._repo = {
-      platform: platform as ICodePlatform,
-      owner,
-      name,
-      commit: '',
-    };
-
-    const hash =
-      location.hash.startsWith('#') && location.hash.indexOf('github') > -1 ? location.hash.split('#')[1] : DEFAULT_URL;
-    const { branch } = parseUri(hash);
-
-    try {
-      if (!branch) {
-        this._repo.commit = await this.codeAPI.asPlatform(CodePlatform.github).getCommit(this._repo, HEAD);
-      } else {
-        const branches = await this.codeAPI.asPlatform(CodePlatform.github).getBranches(this._repo);
-        const originBranch = branches.find((b) => branch === b.name);
-        let originTag;
-        // 尝试查找tag
-        if (!originBranch) {
-          const tags = await this.codeAPI.asPlatform(CodePlatform.github).getTags(this._repo);
-          originTag = tags.find((t) => branch === t.name);
-        }
-        this._repo.commit = originBranch?.commit.id || originTag?.commit.id || '';
-      }
-    } catch (err) {
-      console.error(err);
-    }
-
-    // TODO 不使用 recursive 递归接口直接查询
-    const tree = await this.codeAPI.asPlatform(CodePlatform.github).getTree(this._repo, '', 1).catch(err => {
-      console.error(err);
-      return [];
-    })
-
-    tree.forEach((item) => {
+    files.forEach((item) => {
       map[item.path] = item;
     });
     this.fileMap = map;
