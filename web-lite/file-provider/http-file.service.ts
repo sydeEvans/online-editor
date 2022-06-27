@@ -57,7 +57,7 @@ export class HttpFileService extends AbstractHttpFileService {
     });;
     resp = await resp.json();
     return resp.data.files.map(it => {
-      const {name, size, url, type } = it;
+      const { name, size, url, type } = it;
       return {
         // id: "aaedd8cd5c62e928eddf16ec9a7f78d7a9de3cbb"
         // mode: "100644"
@@ -76,6 +76,19 @@ export class HttpFileService extends AbstractHttpFileService {
         url
       }
     });
+  }
+
+  async fetchFile(uri: Uri) {
+    let resp:any = await fetch(`https://file.sonaco.cc:10000/p${uri.path}`, {
+      // "referrerPolicy": "no-referrer",
+      "body": null,
+      "method": "GET",
+      "mode": "cors",
+      "credentials": "omit"
+    });
+
+    resp = await resp.text();
+    return resp;
   }
 
   async initWorkspace(uri: Uri): Promise<{ [filename: string]: TreeEntry }> {
@@ -133,8 +146,8 @@ export class HttpFileService extends AbstractHttpFileService {
     if (this.fileMap[relativePath].mode === 'new') {
       return this.fileMap[relativePath].content || '';
     }
-    const blob = await this.codeAPI.asPlatform(CodePlatform.github).getBlob(this._repo, this.fileMap[relativePath]);
-    return blob.toString();
+    const text = await this.fetchFile(uri);
+    return text;
   }
 
   async readDir(uri: Uri) {
@@ -142,7 +155,7 @@ export class HttpFileService extends AbstractHttpFileService {
     const treeNode = this.getTargetTreeNode(_uri);
     const relativePath = this.getRelativePath(_uri)
 
-    console.log(_uri, treeNode, relativePath)
+    console.log(uri, '-------')
 
     return (treeNode?.children || []).map((item) => ({
       ...item,

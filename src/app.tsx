@@ -64,7 +64,7 @@ renderApp({
     'editor.scrollBeyondLastLine': false
   },
   // 文件位置
-  workspaceDir: `/aliyun02`,
+  workspaceDir: `/aliyun02/tempfile`,
   extraContextProvider: (props) => (
     <div id='#hi' style={{ width: '100%', height: '100%' }}>
       {props.children}
