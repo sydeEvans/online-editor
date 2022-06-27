@@ -68,7 +68,7 @@ export class HttpFileService extends AbstractHttpFileService {
         // type: "blob"
         // url: "https://api.github.com/repos/opensumi/core/git/blobs/aae
         id: name,
-        mode: '100644',
+        mode: type === 1 ? '040000': '100644',
         name,
         path: name,
         size,

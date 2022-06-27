@@ -87,6 +87,7 @@ export class BrowserFsProvider implements IDiskFileProvider {
   }
 
   async stat(uri: Uri): Promise<FileStat> {
+    console.trace(uri, '----')
     const _uri = new URI(uri);
     return new Promise(async (resolve) => {
       this.doGetStat(_uri, 1)
