@@ -57,8 +57,23 @@ export class HttpFileService extends AbstractHttpFileService {
     });;
     resp = await resp.json();
     return resp.data.files.map(it => {
+      const {name, size, url, type } = it;
       return {
-        
+        // id: "aaedd8cd5c62e928eddf16ec9a7f78d7a9de3cbb"
+        // mode: "100644"
+        // name: ".github/workflows/check.yml"
+        // path: ".github/workflows/check.yml"
+        // sha: "aaedd8cd5c62e928eddf16ec9a7f78d7a9de3cbb"
+        // size: 628
+        // type: "blob"
+        // url: "https://api.github.com/repos/opensumi/core/git/blobs/aae
+        id: name,
+        mode: '100644',
+        name,
+        path: name,
+        size,
+        type: type === 1 ? 'tree' : 'blob',
+        url
       }
     });
   }
@@ -69,13 +84,13 @@ export class HttpFileService extends AbstractHttpFileService {
     } = {};
 
     const files = await this.fetchPath(uri);
-    console.log(files);
 
     files.forEach((item) => {
       map[item.path] = item;
     });
     this.fileMap = map;
     this.fileTree = this.pathToTree(this.fileMap);
+    console.log(this.fileMap, this.fileTree);
     return this.fileMap;
   }
 
@@ -126,6 +141,9 @@ export class HttpFileService extends AbstractHttpFileService {
     const _uri = new URI(uri);
     const treeNode = this.getTargetTreeNode(_uri);
     const relativePath = this.getRelativePath(_uri)
+
+    console.log(_uri, treeNode, relativePath)
+
     return (treeNode?.children || []).map((item) => ({
       ...item,
       path: relativePath + PathSeperator + item.path,
