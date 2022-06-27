@@ -87,7 +87,6 @@ export class BrowserFsProvider implements IDiskFileProvider {
   }
 
   async stat(uri: Uri): Promise<FileStat> {
-    console.trace(uri, '----')
     const _uri = new URI(uri);
     return new Promise(async (resolve) => {
       this.doGetStat(_uri, 1)
@@ -338,8 +337,9 @@ export class BrowserFsProvider implements IDiskFileProvider {
   protected async doGetStat(uri: URI, depth: number): Promise<FileStat | undefined> {
     try {
       const filePath = FileUri.fsPath(uri);
-      const lstat = await promisify(fs.lstat)(filePath);
 
+      const lstat = await promisify(fs.lstat)(filePath);
+  
       if (lstat.isDirectory()) {
         return await this.doCreateDirectoryStat(uri, lstat, depth);
       }
@@ -361,7 +361,9 @@ export class BrowserFsProvider implements IDiskFileProvider {
     const childNodes = await this.httpFileService.readDir(uri.codeUri);
     const ensureNodes: Promise<FileStat>[] = [];
     for (const node of childNodes) {
-      if (node.children.length) {
+      // if (node.children.length) {
+      // @ts-ignore
+      if (node.content.type === 'tree') {  
         ensureNodes.push(this.createDirectory(URI.file(new Path(this.options.rootFolder).join(`${node.path}`).toString()).codeUri));
       } else {
         ensureNodes.push(this.writeFile(URI.file(new Path(this.options.rootFolder).join(`${node.path}`).toString()).codeUri, BinaryBuffer.fromString('').buffer, {create: true, isInit: true, overwrite: false}) as Promise<FileStat>);

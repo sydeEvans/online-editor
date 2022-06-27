@@ -71,7 +71,7 @@ export class HttpFileService extends AbstractHttpFileService {
         mode: type === 1 ? '040000': '100644',
         name,
         path: name,
-        size,
+        // size,
         type: type === 1 ? 'tree' : 'blob',
         url
       }
@@ -104,6 +104,7 @@ export class HttpFileService extends AbstractHttpFileService {
     this.fileMap = map;
     this.fileTree = this.pathToTree(this.fileMap);
     console.log(this.fileMap, this.fileTree);
+    // debugger
     return this.fileMap;
   }
 
@@ -155,12 +156,14 @@ export class HttpFileService extends AbstractHttpFileService {
     const treeNode = this.getTargetTreeNode(_uri);
     const relativePath = this.getRelativePath(_uri)
 
-    console.log(uri, '-------')
 
-    return (treeNode?.children || []).map((item) => ({
+    const resp = (treeNode?.children || []).map((item) => ({
       ...item,
       path: relativePath + PathSeperator + item.path,
     }));
+    console.log(uri, resp, '-------')
+
+    return resp;
   }
 
   private getTargetTreeNode(uri: URI) {
